@@ -1,6 +1,7 @@
 #include "mesh.h"
 #include "linmath.h"
 
+
 void error_callback(int error, const char* description) {
     fprintf(stderr, "Error: %s\n", description);
 }
@@ -26,34 +27,59 @@ int main() {
         return 1;
     }
     glfwMakeContextCurrent(window);
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        std::cout << "glewInit failed";
+    if (!gladLoadGL()) {
+        std::cout << "gladLoadGL failed";
         glfwTerminate();
         return 1;
     }
+    glEnable(GL_DEPTH_TEST);
 
     Model model = Model("brick.obj");
     Shader shader = Shader("vertexShader.gl", "fragmentShader.gl");
-    GLuint modelview_projection_param = glGetUniformLocation(shader.ID, "MVP");
+
+    shader.use();
+    float pi = 3.1415926f;
+
+//    shader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+//    shader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+//    shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+//    shader.setFloat("material.shininess", 0.0f);
+//    shader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+//    shader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
+//    shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
     while (!glfwWindowShouldClose(window)) {
+        glDisable(GL_BLEND);
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         float ratio = width / (float) height;
         glViewport(0, 0, width, height);
 
-        mat4x4 m, p, mvp;
-        glClear(GL_COLOR_BUFFER_BIT);
+        mat4x4 p;
 
-        mat4x4_perspective(p, 1.8, ratio, -10.0f, 10.0f);
+        glm::mat4 m = glm::mat4(1.0f);
+        m = glm::translate(m, glm::vec3(-1.0f, 0.0f, -5.0f));
+        m = glm::rotate(m, (float)glfwGetTime() * 2, glm::vec3(1.0f, 0.0f, 0.0f));
+        m = glm::rotate(m, (float)glfwGetTime() / 2, glm::vec3(0.0f, 1.0f, 0.0f));
 
-        mat4x4_translate(m, 0.0f, 1, -3.0f);
-        mat4x4_mul(mvp, m, p);
+        glm::mat4 view = glm::mat4(1.0f);
+        mat4x4_perspective(p, 1.8f, ratio, 0.001f, 60);
 
-        glUniformMatrix4fv(modelview_projection_param, 1, GL_FALSE, (const GLfloat*)mvp);
+        shader.use();
+        shader.setMat4("model", glm::value_ptr(m));
+        shader.setMat4("view", glm::value_ptr(view));
+        shader.setMat4("projection", (const GLfloat*)p);
+        shader.setVec3("lightPos", 2.0, 2.0, -3.0);
+
+        shader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+        shader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
+        shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
         model.Draw(shader);
+
         glfwSwapBuffers(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glfwPollEvents();
     }
 

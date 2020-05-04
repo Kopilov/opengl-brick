@@ -1,9 +1,11 @@
 #ifndef LEARNOPENGL_MESH_H
 #define LEARNOPENGL_MESH_H
 
-#include <GL/glew.h>
+#include "glad.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -17,6 +19,16 @@ struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
+//    float Position[3];
+//    float Normal[3];
+//    float TexCoords[2];
+};
+
+struct Material {
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
 };
 
 struct Texture {
@@ -38,6 +50,8 @@ public:
     void setBool(const std::string &name, bool value) const;
     void setInt(const std::string &name, int value) const;
     void setFloat(const std::string &name, float value) const;
+    void setVec3(const std::string &name, float value0, float value1, float value2) const;
+    void setMat4(const std::string &name, const float* value) const;
 };
 
 class Mesh {
@@ -46,8 +60,9 @@ class Mesh {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
         std::vector<Texture> textures;
+        Material material;
         /*  Functions  */
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Material material);
         void Draw(Shader shader);
     private:
         /*  Render data  */
@@ -56,6 +71,8 @@ class Mesh {
         void setupMesh();
 };
 
+void printMaterialsMetadata(const aiScene *scene);
+
 class Model {
     public:
         /*  Functions   */
@@ -63,10 +80,12 @@ class Model {
             loadModel(path);
         }
         void Draw(Shader shader);
+
     private:
         /*  Model Data  */
         std::vector<Mesh> meshes;
         std::string directory;
+        std::vector<Texture> textures_loaded;
         /*  Functions   */
         void loadModel(std::string path);
         void processNode(aiNode *node, const aiScene *scene);
@@ -74,5 +93,8 @@ class Model {
         std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                              std::string typeName);
 };
+
+unsigned int TextureFromFile(const char *path, const std::string &directory);
+
 
 #endif // LEARNOPENGL_MESH_H
