@@ -40,16 +40,7 @@ int main() {
     shader.use();
     float pi = 3.1415926f;
 
-//    shader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-//    shader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-//    shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-//    shader.setFloat("material.shininess", 0.0f);
-//    shader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-//    shader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
-//    shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
     while (!glfwWindowShouldClose(window)) {
-        glDisable(GL_BLEND);
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         float ratio = width / (float) height;
