@@ -1,5 +1,5 @@
 #!/bin/bash
-
+git submodule update --init
 mkdir -p build
 cp *.gl *.mtl *.obj build
 cd build
